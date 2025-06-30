@@ -1,5 +1,6 @@
 #+title: Masami - Rust-based tooling for Muen subjects
 #+author: Lana Black <lana@illuminati.industries>
+#+options: toc:nil
 
 Masami is a set of libraries and tools to enable building subjects for Muen
 Separation Kernel in Rust and eventually in Haskell programming languages.
