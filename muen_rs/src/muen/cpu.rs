@@ -1,5 +1,10 @@
+use core::arch::asm;
 use x86_64::addr::*;
-use x86_64::structures::{gdt::{Descriptor, GlobalDescriptorTable}, tss::TaskStateSegment};
+use x86_64::structures::idt::{InterruptDescriptorTable,
+                              InterruptStackFrame,
+                              PageFaultErrorCode};
+use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable};
+use x86_64::structures::tss::TaskStateSegment;
 
 const STACK_SIZE: usize = 4096;
 
@@ -16,6 +21,8 @@ unsafe fn stack_to_virt(s: &[u8]) -> VirtAddr {
 static mut TSS_LO: TaskStateSegment = TaskStateSegment::new();
 static mut GDT: GlobalDescriptorTable = GlobalDescriptorTable::new();
 
+static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
+
 //const GDT_TSS_LO: usize = 3;
 //const GDT_TSS_HI: usize = 4;
 
@@ -30,4 +37,42 @@ pub unsafe fn cpu_init() {
 
     GDT.append(Descriptor::tss_segment(&TSS_LO));
     GDT.load();
+
+    // Replace it with set_general_handler! when
+    // https://github.com/rust-osdev/x86_64/issues/553 is fixed
+    for i in 0..31 {
+        IDT[i].set_handler_fn(interrupt_hdl);
+    }
+    IDT.invalid_tss.set_handler_fn(interrupt_code);
+    IDT.segment_not_present.set_handler_fn(interrupt_code);
+    IDT.stack_segment_fault.set_handler_fn(interrupt_code);
+    IDT.general_protection_fault.set_handler_fn(interrupt_code);
+    IDT.cp_protection_exception.set_handler_fn(interrupt_code);
+    IDT.vmm_communication_exception.set_handler_fn(interrupt_code);
+    IDT.security_exception.set_handler_fn(interrupt_code);
+    IDT.page_fault.set_handler_fn(page_fault_handler);
+//    IDT.double_fault.set_handler_addr(interrupt_code_d.to_virt_addr());
+
+    IDT.load();
+}
+
+extern "x86-interrupt"
+fn interrupt_hdl(f: InterruptStackFrame) {
+    unsafe { f.iretq(); }
+}
+
+extern "x86-interrupt"
+fn interrupt_code(f: InterruptStackFrame, _code: u64) {
+    unsafe { f.iretq(); }
+}
+
+extern "x86-interrupt"
+fn page_fault_handler(f: InterruptStackFrame, _code: PageFaultErrorCode) {
+    unsafe { f.iretq(); }
+}
+
+#[allow(unsafe_op_in_unsafe_fn)]
+pub unsafe fn cpu_halt() -> ! {
+    asm!("cli", "hlt");
+    loop {}
 }
