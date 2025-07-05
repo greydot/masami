@@ -18,7 +18,7 @@ unsafe fn stack_to_virt(s: &[u8]) -> VirtAddr {
     VirtAddr::new(p)
 }
 
-static mut TSS_LO: TaskStateSegment = TaskStateSegment::new();
+static mut TSS: TaskStateSegment = TaskStateSegment::new();
 static mut GDT: GlobalDescriptorTable = GlobalDescriptorTable::new();
 
 static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
@@ -31,11 +31,11 @@ pub unsafe fn cpu_init() {
     GDT.append(Descriptor::kernel_code_segment());
     GDT.append(Descriptor::kernel_data_segment());
 
-    TSS_LO.interrupt_stack_table[0] = stack_to_virt(&INTR_STACK);
-    TSS_LO.interrupt_stack_table[1] = stack_to_virt(&TRAP_STACK);
-    TSS_LO.interrupt_stack_table[2] = stack_to_virt(& NMI_STACK);
+    TSS.interrupt_stack_table[0] = stack_to_virt(&INTR_STACK);
+    TSS.interrupt_stack_table[1] = stack_to_virt(&TRAP_STACK);
+    TSS.interrupt_stack_table[2] = stack_to_virt(& NMI_STACK);
 
-    GDT.append(Descriptor::tss_segment(&TSS_LO));
+    GDT.append(Descriptor::tss_segment(&TSS));
     GDT.load();
 
     // Replace it with set_general_handler! when
