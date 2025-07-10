@@ -1,5 +1,6 @@
 use core::ffi::c_void;
 
+use super::console::*;
 use super::cpu::*;
 use super::sinfo::*;
 
@@ -11,4 +12,6 @@ fn _start(_arg: *mut c_void) {
         panic!("INVALID MAGIC NUMBER IN SUBJECT INFO")
     }
     unsafe { cpu_init(); }
+    let console = Console::init(sinfo).unwrap();
+
 }

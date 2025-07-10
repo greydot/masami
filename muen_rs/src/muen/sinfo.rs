@@ -72,14 +72,14 @@ enum MuenContentKind{
 #[repr(C, packed)]
 #[derive(Clone,Copy)]
 pub struct MuenMemRegion {
-    kind: MuenMemoryKind,
-    content: MuenContentKind,
-    flags: u8,
-    pattern: u16,
+    pub kind: MuenMemoryKind,
+    pub content: MuenContentKind,
+    pub flags: u8,
+    pub pattern: u16,
     padding1: [c_char;3],
-    address: u64,
-    size: u64,
-    hash: [u8; HASH_SIZE]
+    pub address: u64,
+    pub size: u64,
+    pub hash: [u8; HASH_SIZE]
 }
 
 const MAX_VARIANT_SZ: usize = size_of::<MuenMemRegion>();
