@@ -12,6 +12,6 @@ fn _start(_arg: *mut c_void) {
         panic!("INVALID MAGIC NUMBER IN SUBJECT INFO")
     }
     unsafe { cpu_init(); }
-    let console = Console::init(sinfo).unwrap();
-
+    let mut console = Console::init(sinfo).unwrap();
+    console.write("Masami initialised");
 }

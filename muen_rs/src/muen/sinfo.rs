@@ -36,7 +36,7 @@ impl MuenName {
 #[repr(C)]
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Clone,Copy)]
-enum MuenMemoryKind {
+pub enum MuenMemoryKind {
     MUEN_MEM_SUBJ = 0,
     MUEN_MEM_SUBJ_INFO,
     MUEN_MEM_SUBJ_BIN,
@@ -62,7 +62,7 @@ enum MuenMemoryKind {
 #[repr(C)]
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Clone,Copy)]
-enum MuenContentKind{
+pub enum MuenContentKind{
     MUEN_CONTENT_UNINITIALIZED = 0,
     MUEN_CONTENT_FILL,
     MUEN_CONTENT_FILE

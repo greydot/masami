@@ -3,7 +3,6 @@ use super::sched::*;
 use super::sinfo::*;
 
 use core::ffi::c_char;
-use core::mem;
 
 const DEBUGLOG_PROTO: u64 = 0xf00789094b6f70cf;
 const MSG_SIZE:usize = 56;
@@ -28,7 +27,7 @@ pub struct Console<'a> {
 }
 
 impl<'a> Console<'a> {
-    pub fn init(sinfo: &'a SubjectInfo) -> Option<Console> {
+    pub fn init(sinfo: &'a SubjectInfo) -> Option<Console<'a>> {
         let res = sinfo.get_resource("debuglog", MuenResourceKind::MUEN_RES_MEMORY)?;
         let sched = SchedulingInfo::init();
         let epoch: u64 = sched.tsc_schedule_start;
@@ -52,6 +51,15 @@ impl<'a> Console<'a> {
     }
 
     pub fn write(&mut self, s: &str) {
-        let pos = self.pos;
+        for c in s.as_bytes() {
+            if *c as char != '\x0d' {
+                self.buf.data[self.pos] = *c as c_char;
+                if self.pos == 55 {
+                    self.flush();
+                } else {
+                    self.pos += 1;
+                }
+            }
+        }
     }
 }
