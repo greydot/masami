@@ -2,7 +2,8 @@ use super::channel::Channel;
 use super::sched::*;
 use super::sinfo::*;
 
-use core::ffi::c_char;
+use core::ffi::{c_char, c_size_t};
+use core::slice;
 
 const DEBUGLOG_PROTO: u64 = 0xf00789094b6f70cf;
 const MSG_SIZE:usize = 56;
@@ -26,6 +27,8 @@ pub struct Console<'a> {
     pos: usize
 }
 
+static mut CONSOLE: Option<Console<'static>> = None;
+
 impl<'a> Console<'a> {
     pub fn init(sinfo: &'a SubjectInfo) -> Option<Console<'a>> {
         let res = sinfo.get_resource("debuglog", MuenResourceKind::MUEN_RES_MEMORY)?;
@@ -40,6 +43,15 @@ impl<'a> Console<'a> {
         channel.init_writer(DEBUGLOG_PROTO, mem_size, epoch);
 
         Some(Console{channel, buf: Msg::new(), pos: 0})
+    }
+
+    #[allow(static_mut_refs)]
+    pub fn get() -> &'static mut Console<'static> {
+        unsafe {
+            CONSOLE.get_or_insert(
+                Console::init(SubjectInfo::init()).expect("Failed to initialise console")
+            )
+        }
     }
 
     pub fn flush(&mut self) {
@@ -62,4 +74,19 @@ impl<'a> Console<'a> {
             }
         }
     }
+}
+
+pub fn write_line(s: &str) {
+    let mut console = Console::get();
+    console.write(s)
+}
+
+pub extern "C"
+fn c_write_line(s: *const c_char, sz: c_size_t) {
+    let s = unsafe {
+        let p = s as *const u8;
+        let sl = slice::from_raw_parts(p, sz);
+        str::from_utf8_unchecked(sl)
+    };
+    write_line(s);
 }

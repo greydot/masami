@@ -26,8 +26,8 @@ static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
 //const GDT_TSS_LO: usize = 3;
 //const GDT_TSS_HI: usize = 4;
 
-#[allow(static_mut_refs, unsafe_op_in_unsafe_fn)]
-pub unsafe fn cpu_init() {
+#[allow(static_mut_refs)]
+pub fn cpu_init() { unsafe {
     GDT.append(Descriptor::kernel_code_segment());
     GDT.append(Descriptor::kernel_data_segment());
 
@@ -54,7 +54,7 @@ pub unsafe fn cpu_init() {
 //    IDT.double_fault.set_handler_addr(interrupt_code_d.to_virt_addr());
 
     IDT.load();
-}
+} }
 
 extern "x86-interrupt"
 fn interrupt_hdl(f: InterruptStackFrame) {
