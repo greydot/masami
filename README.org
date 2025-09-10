@@ -1,0 +1,16 @@
+#+title: Masami - Rust-based tooling for Muen subjects
+#+author: Lana Black <lana@illuminati.industries>
+#+options: toc:nil
+
+Masami is a set of libraries and tools to enable building subjects for
+[[https://muen.sk/][Muen Separation Kernel]] in Rust. The project is work in progress. Right now, only
+basic initialisation and console output are possible.
+
+* About the name
+
+Muen among other things happens to be an music album by Merzbow (aka Masami
+Akita).
+
+* Build instructions
+
+<TODO>
